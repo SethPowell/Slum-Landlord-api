@@ -59,7 +59,7 @@ def add_user():
     post_data = request.get_json()
     username = post_data.get("username")
     password = post_data.get("password")
-    money = post_data.get("money")
+    money = post_data.get("money", 0)
 
     new_record = User(username, password, money)
     db.session.add(new_record)
@@ -67,7 +67,10 @@ def add_user():
 
     return jsonify(user_schema.dump(new_record))
 
-
+@app.route("/user/get", methods=["GET"])
+def get_all_users():
+    all_users = db.session.query(User).all()
+    return jsonify(multiple_user_schema.dump(all_users))
 
 # always goes at the end
 if __name__ == "__main__":
