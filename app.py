@@ -95,6 +95,17 @@ def add_token():
 
     return jsonify(token_schema.dump(new_record))
 
+@app.route("/token/get", methods=["GET"])
+def get_all_tokens():
+    all_tokens = db.session.query(Token).all()
+    return jsonify(multiple_token_schema.dump(all_tokens))
+
+@app.route("/token/get/<id>", methods=["GET"])
+def get_token(id):
+    token = db.session.query(Token).filter(Token.id == id).first()
+    return jsonify(token_schema.dump(token))
+
+
 
 # always goes at the end
 if __name__ == "__main__":
