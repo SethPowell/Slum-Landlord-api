@@ -50,6 +50,7 @@ class UserSchema(ma.Schema):
 user_schema = UserSchema()
 multiple_user_schema = UserSchema(many=True)
 
+# USER ENDPOINTS
 
 @app.route("/user/add", methods=["POST"])
 def add_user():
@@ -76,6 +77,24 @@ def get_all_users():
 def get_user(username):
     user = db.session.query(User).filter(User.username == username).first()
     return jsonify(user_schema.dump(user))
+
+# TOKEN ENDPOINTS
+
+@app.route("/token/add", methods=["POST"])
+def add_token():
+    if request.content_type != "application/json":
+        return jsonify("Error: Data for add_token must be sent as json")
+    
+    post_data = request.get_json()
+    name = post_data.get("name")
+    user_id = post_data.get("user_id")
+
+    new_record = Token(name, user_id)
+    db.session.add(new_record)
+    db.session.commit()
+
+    return jsonify(token_schema.dump(new_record))
+
 
 # always goes at the end
 if __name__ == "__main__":
