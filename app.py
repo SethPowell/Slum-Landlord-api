@@ -72,16 +72,6 @@ def add_user():
 
     return jsonify(user_schema.dump(new_record))
 
-@app.route("/user/get", methods=["GET"])
-def get_all_users():
-    all_users = db.session.query(User).all()
-    return jsonify(multiple_user_schema.dump(all_users))
-
-@app.route("/user/get/<username>", methods=["GET"])
-def get_user(username):
-    user = db.session.query(User).filter(User.username == username).first()
-    return jsonify(user_schema.dump(user))
-
 @app.route("/user/verification", methods=["POST"])
 def verification():
     if request.content_type != "application/json":
@@ -100,6 +90,31 @@ def verification():
         return jsonify("Unable to verify user credentials")
 
     return jsonify("User Verified")
+
+@app.route("/user/get", methods=["GET"])
+def get_all_users():
+    all_users = db.session.query(User).all()
+    return jsonify(multiple_user_schema.dump(all_users))
+
+@app.route("/user/get/<username>", methods=["GET"])
+def get_user(username):
+    user = db.session.query(User).filter(User.username == username).first()
+    return jsonify(user_schema.dump(user))
+
+@app.route("/user/update/<id>", methods=["PUT"])
+def update_user(id):
+    if request.content_type != "application/json":
+        return jsonify("Error: Data for update_user must be sent as json")
+
+    money = request.json.get("money")
+
+    user = db.session.query(User).filter(User.id == id).first()
+
+    user.money = money
+    db.session.commit()
+
+    return jsonify(user_schema.dump(user))
+
 
 # TOKEN ENDPOINTS
 
@@ -127,6 +142,7 @@ def get_all_tokens():
 def get_token(id):
     token = db.session.query(Token).filter(Token.id == id).first()
     return jsonify(token_schema.dump(token))
+
 
 
 
