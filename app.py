@@ -143,6 +143,17 @@ def get_token(id):
     token = db.session.query(Token).filter(Token.id == id).first()
     return jsonify(token_schema.dump(token))
 
+@app.route("/token/delete/<user_id>", methods=["DELETE"])
+def delete_tokens(user_id):
+    tokens = db.session.query(Token).filter(Token.user_id == user_id).all()
+
+    for token in tokens:
+        db.session.delete(token)
+        db.session.commit()
+
+    user = db.session.query(User).filter(User.id == user_id).first()
+
+    return jsonify(user_schema.dump(user))
 
 
 
