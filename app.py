@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
+from flask_bcrypt import Bcrypt
 from flask_cors import CORS
 
 app = Flask(__name__)
@@ -8,6 +9,7 @@ app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://hvjgxdfiotwggc:1c73534dcde
 
 db = SQLAlchemy(app)
 ma = Marshmallow(app)
+bcrypt = Bcrypt(app)
 CORS(app)
 
 
@@ -62,7 +64,9 @@ def add_user():
     password = post_data.get("password")
     money = post_data.get("money", 0)
 
-    new_record = User(username, password, money)
+    pw_hash = bcrypt.generate_password_hash(password).decode("utf-8")
+
+    new_record = User(username, pw_hash, money)
     db.session.add(new_record)
     db.session.commit()
 
@@ -92,7 +96,7 @@ def verification():
     if user is None:
         return jsonify("Unable to verify user credentials")
 
-    if user.password != password:
+    if not bcrypt.check_password_hash(user.password, password):
         return jsonify("Unable to verify user credentials")
 
     return jsonify("User Verified")
