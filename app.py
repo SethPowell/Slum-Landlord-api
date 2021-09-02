@@ -78,6 +78,25 @@ def get_user(username):
     user = db.session.query(User).filter(User.username == username).first()
     return jsonify(user_schema.dump(user))
 
+@app.route("/user/verification", methods=["POST"])
+def verification():
+    if request.content_type != "application/json":
+        return jsonify("Error: Data for verification must be sent as json")
+
+    post_data = request.get_json()
+    username = post_data.get("username")
+    password = post_data.get("password")
+
+    user = db.session.query(User).filter(User.username == username).first()
+
+    if user is None:
+        return jsonify("Unable to verify user credentials")
+
+    if user.password != password:
+        return jsonify("Unable to verify user credentials")
+
+    return jsonify("User Verified")
+
 # TOKEN ENDPOINTS
 
 @app.route("/token/add", methods=["POST"])
