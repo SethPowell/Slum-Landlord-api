@@ -17,12 +17,14 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String, nullable=False, unique=True)
     password = db.Column(db.String, nullable=False)
+    existing_game = db.Column(db.Boolean, nullable=False)
     money = db.Column(db.Float, nullable=False)
     tokens = db.relationship("Token", backref="user", cascade="all, delete, delete-orphan")
 
     def __init__(self, username, password, money=1): 
         self.username = username
         self.password = password
+        self.existing_game = False
         self.money = money
 
 
@@ -46,7 +48,7 @@ multiple_token_schema = TokenSchema(many=True)
 
 class UserSchema(ma.Schema):
     class Meta:
-        fields = ("id", "username", "password", "money", "tokens") # Normally you wouldn't include password or anything sensitive
+        fields = ("id", "username", "password", "existing_game", "money", "tokens") # Normally you wouldn't include password or anything sensitive
     tokens= ma.Nested(multiple_token_schema)
 
 user_schema = UserSchema()
@@ -89,7 +91,7 @@ def verification():
     if not bcrypt.check_password_hash(user.password, password):
         return jsonify("Unable to verify user credentials")
 
-    return jsonify("User Verified")
+    return jsonify(user_schema.dump(user))
 
 @app.route("/user/get", methods=["GET"])
 def get_all_users():
@@ -107,9 +109,10 @@ def update_user(id):
         return jsonify("Error: Data for update_user must be sent as json")
 
     money = request.json.get("money")
-
+    existing_game = request.json.get("existing_game")
     user = db.session.query(User).filter(User.id == id).first()
 
+    user.existing_game = existing_game
     user.money = money
     db.session.commit()
 
