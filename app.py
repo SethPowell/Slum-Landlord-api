@@ -134,7 +134,9 @@ def add_token():
     db.session.add(new_record)
     db.session.commit()
 
-    return jsonify(token_schema.dump(new_record))
+    user = db.session.query(User).filter(User.id == user_id).first()
+
+    return jsonify(user_schema.dump(user))
 
 @app.route("/token/get", methods=["GET"])
 def get_all_tokens():
